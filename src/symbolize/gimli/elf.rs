@@ -2,6 +2,9 @@
 
 use super::mystd::ffi::OsStr;
 use super::mystd::fs;
+#[cfg(target_os = "emerald")]
+use super::mystd::os::emerald::ffi::OsStrExt;
+#[cfg(unix)]
 use super::mystd::os::unix::ffi::OsStrExt;
 use super::mystd::path::{Path, PathBuf};
 use super::Either;

@@ -177,6 +177,7 @@ cfg_if::cfg_if! {
                 not(target_os = "emscripten"),
                 not(all(target_os = "ios", target_arch = "arm")),
             ),
+            target_os = "emerald",
             all(
                 target_env = "sgx",
                 target_vendor = "fortanix",

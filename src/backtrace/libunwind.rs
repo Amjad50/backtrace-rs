@@ -20,11 +20,7 @@ use core::ptr::addr_of_mut;
 
 pub enum Frame {
     Raw(*mut uw::_Unwind_Context),
-    Cloned {
-        ip: *mut c_void,
-        sp: *mut c_void,
-        symbol_address: *mut c_void,
-    },
+    Cloned { ip: *mut c_void, sp: *mut c_void, symbol_address: *mut c_void },
 }
 
 // With a raw libunwind pointer it should only ever be access in a readonly
@@ -91,11 +87,7 @@ impl Frame {
 
 impl Clone for Frame {
     fn clone(&self) -> Frame {
-        Frame::Cloned {
-            ip: self.ip(),
-            sp: self.sp(),
-            symbol_address: self.symbol_address(),
-        }
+        Frame::Cloned { ip: self.ip(), sp: self.sp(), symbol_address: self.symbol_address() }
     }
 }
 
@@ -122,19 +114,13 @@ pub unsafe fn trace(mut cb: &mut dyn FnMut(&super::Frame) -> bool) {
         arg: *mut c_void,
     ) -> uw::_Unwind_Reason_Code {
         let cb = unsafe { &mut *arg.cast::<&mut dyn FnMut(&super::Frame) -> bool>() };
-        let cx = super::Frame {
-            inner: Frame::Raw(ctx),
-        };
+        let cx = super::Frame { inner: Frame::Raw(ctx) };
 
         let mut bomb = Bomb { enabled: true };
         let keep_going = cb(&cx);
         bomb.enabled = false;
 
-        if keep_going {
-            uw::_URC_NO_REASON
-        } else {
-            uw::_URC_FAILURE
-        }
+        if keep_going { uw::_URC_NO_REASON } else { uw::_URC_FAILURE }
     }
 }
 
@@ -147,9 +133,9 @@ pub unsafe fn trace(mut cb: &mut dyn FnMut(&super::Frame) -> bool) {
 #[allow(non_snake_case)]
 #[allow(dead_code)]
 mod uw {
-    pub use self::_Unwind_Reason_Code::*;
-
     use core::ffi::c_void;
+
+    pub use self::_Unwind_Reason_Code::*;
 
     #[repr(C)]
     pub enum _Unwind_Reason_Code {
@@ -189,7 +175,7 @@ mod uw {
             not(all(target_os = "nuttx", target_arch = "arm")),
         ))] {
             unsafe extern "C" {
-                pub fn _Unwind_GetIP(ctx: *mut _Unwind_Context) -> libc::uintptr_t;
+                pub fn _Unwind_GetIP(ctx: *mut _Unwind_Context) -> usize;
                 pub fn _Unwind_FindEnclosingFunction(pc: *mut c_void) -> *mut c_void;
 
                 #[cfg(not(all(target_os = "linux", target_arch = "s390x")))]
@@ -199,7 +185,7 @@ mod uw {
                 //
                 // https://github.com/libunwind/libunwind/blob/d32956507cf29d9b1a98a8bce53c78623908f4fe/src/unwind/GetCFA.c#L28-L35
                 #[link_name = "_Unwind_GetCFA"]
-                pub fn get_sp(ctx: *mut _Unwind_Context) -> libc::uintptr_t;
+                pub fn get_sp(ctx: *mut _Unwind_Context) -> usize;
 
             }
 

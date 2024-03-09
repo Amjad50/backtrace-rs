@@ -11,8 +11,9 @@ use super::ResolveWhat;
 use super::SymbolName;
 use addr2line::gimli;
 use core::convert::TryInto;
+use core::ffi::c_void;
 use core::mem;
-use libc::c_void;
+use core::u32;
 use mystd::ffi::OsString;
 use mystd::fs::File;
 use mystd::path::Path;
@@ -247,6 +248,9 @@ cfg_if::cfg_if! {
     } else if #[cfg(target_os = "aix")] {
         mod libs_aix;
         use libs_aix::native_libraries;
+    } else if #[cfg(target_os = "emerald")] {
+        mod libs_emerald;
+        use libs_emerald::native_libraries;
     } else {
         // Everything else should doesn't know how to load native libraries.
         fn native_libraries() -> Vec<Library> {
