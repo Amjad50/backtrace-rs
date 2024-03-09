@@ -178,6 +178,7 @@ cfg_if::cfg_if! {
                 not(all(target_os = "ios", target_arch = "arm")),
                 not(all(target_os = "nto", target_env = "nto70")),
             ),
+            target_os = "emerald",
             all(
                 target_env = "sgx",
                 target_vendor = "fortanix",
